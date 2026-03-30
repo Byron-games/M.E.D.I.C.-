@@ -1,0 +1,36 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: telemedicine-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:healthnet_telemedicine}
+    username: ${DB_USER:healthnet}
+    password: ${DB_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+
+healthnet:
+  telemedicine:
+    provider: ${TELEMEDICINE_PROVIDER:JITSI}
+    base-url: ${TELEMEDICINE_BASE_URL:https://meet.healthnet.com}
+    daily:
+      api-key: ${DAILY_API_KEY:}
+    jitsi:
+      base-url: ${JITSI_BASE_URL:https://meet.jit.si}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true

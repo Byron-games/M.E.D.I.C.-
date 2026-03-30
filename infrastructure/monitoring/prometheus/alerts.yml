@@ -1,0 +1,72 @@
+groups:
+  - name: healthnet-service-alerts
+    rules:
+
+      # Service down for more than 1 minute
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is DOWN"
+          description: "{{ $labels.job }} has been unreachable for more than 1 minute. Immediate attention required."
+
+      # High API latency (p95 > 2 seconds) - critical for medical systems
+      - alert: HighApiLatency
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency on {{ $labels.job }}"
+          description: "95th percentile latency is {{ $value | humanizeDuration }} on {{ $labels.job }}. Medical systems require fast responses."
+
+      # High error rate (> 5% of requests are 5xx)
+      - alert: HighErrorRate
+        expr: |
+          rate(http_server_requests_seconds_count{status=~"5.."}[5m])
+          /
+          rate(http_server_requests_seconds_count[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value | humanizePercentage }} on {{ $labels.job }}."
+
+      # JVM heap usage above 85%
+      - alert: JvmHeapPressure
+        expr: |
+          jvm_memory_used_bytes{area="heap"}
+          /
+          jvm_memory_max_bytes{area="heap"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM heap pressure on {{ $labels.job }}"
+          description: "Heap usage is at {{ $value | humanizePercentage }} on {{ $labels.job }}."
+
+      # Database connection pool exhaustion
+      - alert: DbConnectionPoolExhausted
+        expr: hikaricp_connections_pending > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DB connection pool under pressure on {{ $labels.job }}"
+          description: "{{ $value }} threads are waiting for a DB connection on {{ $labels.job }}."
+
+  - name: healthnet-business-alerts
+    rules:
+
+      # Disease outbreak detected (from analytics service custom metric)
+      - alert: OutbreakDetected
+        expr: healthnet_outbreak_alert_count > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disease outbreak alert triggered"
+          description: "{{ $value }} active outbreak alerts detected in the analytics service."

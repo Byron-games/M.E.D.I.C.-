@@ -1,0 +1,43 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iml
+*.iws
+.classpath
+.project
+.settings/
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets — NEVER commit these
+*.env
+.env
+.env.*
+**/application-prod.yml
+**/application-local.yml
+infrastructure/kubernetes/base/secrets/secrets.yml
+infrastructure/ansible/inventory/hosts.ini
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+*.class
+
+# Dependency Check reports (contain vulnerability details)
+dependency-check-report.*

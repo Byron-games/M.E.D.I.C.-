@@ -1,0 +1,277 @@
+version: '3.9'
+
+# HealthNet - Local Development Stack
+# Run: docker-compose up -d
+# All services start with hot-reload via Spring DevTools
+
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  postgres-patients:
+    image: postgres:15-alpine
+    container_name: hn-postgres-patients
+    environment:
+      POSTGRES_DB: healthnet_patients
+      POSTGRES_USER: healthnet
+      POSTGRES_PASSWORD: changeme_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-patients-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthnet -d healthnet_patients"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-emr:
+    image: postgres:15-alpine
+    container_name: hn-postgres-emr
+    environment:
+      POSTGRES_DB: healthnet_emr
+      POSTGRES_USER: healthnet
+      POSTGRES_PASSWORD: changeme_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-emr-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthnet -d healthnet_emr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-appointments:
+    image: postgres:15-alpine
+    container_name: hn-postgres-appt
+    environment:
+      POSTGRES_DB: healthnet_appointments
+      POSTGRES_USER: healthnet
+      POSTGRES_PASSWORD: changeme_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-appt-data:/var/lib/postgresql/data
+
+  postgres-telemedicine:
+    image: postgres:15-alpine
+    container_name: hn-postgres-tele
+    environment:
+      POSTGRES_DB: healthnet_telemedicine
+      POSTGRES_USER: healthnet
+      POSTGRES_PASSWORD: changeme_dev
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-tele-data:/var/lib/postgresql/data
+
+  postgres-pharmacy:
+    image: postgres:15-alpine
+    container_name: hn-postgres-pharmacy
+    environment:
+      POSTGRES_DB: healthnet_pharmacy
+      POSTGRES_USER: healthnet
+      POSTGRES_PASSWORD: changeme_dev
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres-pharmacy-data:/var/lib/postgresql/data
+
+  postgres-analytics:
+    image: postgres:15-alpine
+    container_name: hn-postgres-analytics
+    environment:
+      POSTGRES_DB: healthnet_analytics
+      POSTGRES_USER: healthnet
+      POSTGRES_PASSWORD: changeme_dev
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres-analytics-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: hn-redis
+    command: redis-server --requirepass changeme_dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # ── Application Services ───────────────────────────────────────────────────
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: hn-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: changeme_dev
+      JWT_SECRET: dev-secret-key-min-256-bits-change-in-production-!!
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - healthnet-network
+
+  patient-identity-service:
+    build:
+      context: ./patient-identity-service
+      dockerfile: Dockerfile
+    container_name: hn-patient-identity
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: postgres-patients
+      DB_PORT: 5432
+      DB_NAME: healthnet_patients
+      DB_USER: healthnet
+      DB_PASSWORD: changeme_dev
+    depends_on:
+      postgres-patients:
+        condition: service_healthy
+    networks:
+      - healthnet-network
+
+  emr-service:
+    build:
+      context: ./emr-service
+      dockerfile: Dockerfile
+    container_name: hn-emr
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: postgres-emr
+      DB_PORT: 5432
+      DB_NAME: healthnet_emr
+      DB_USER: healthnet
+      DB_PASSWORD: changeme_dev
+    depends_on:
+      postgres-emr:
+        condition: service_healthy
+    networks:
+      - healthnet-network
+
+  appointment-service:
+    build:
+      context: ./appointment-service
+      dockerfile: Dockerfile
+    container_name: hn-appointments
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: postgres-appointments
+      DB_PORT: 5432
+      DB_NAME: healthnet_appointments
+      DB_USER: healthnet
+      DB_PASSWORD: changeme_dev
+    depends_on:
+      - postgres-appointments
+    networks:
+      - healthnet-network
+
+  telemedicine-service:
+    build:
+      context: ./telemedicine-service
+      dockerfile: Dockerfile
+    container_name: hn-telemedicine
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: postgres-telemedicine
+      DB_PORT: 5432
+      DB_NAME: healthnet_telemedicine
+      DB_USER: healthnet
+      DB_PASSWORD: changeme_dev
+      TELEMEDICINE_PROVIDER: JITSI
+      JITSI_BASE_URL: https://meet.jit.si
+    depends_on:
+      - postgres-telemedicine
+    networks:
+      - healthnet-network
+
+  pharmacy-service:
+    build:
+      context: ./pharmacy-service
+      dockerfile: Dockerfile
+    container_name: hn-pharmacy
+    ports:
+      - "8085:8085"
+    environment:
+      DB_HOST: postgres-pharmacy
+      DB_PORT: 5432
+      DB_NAME: healthnet_pharmacy
+      DB_USER: healthnet
+      DB_PASSWORD: changeme_dev
+    depends_on:
+      - postgres-pharmacy
+    networks:
+      - healthnet-network
+
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: hn-analytics
+    ports:
+      - "8086:8086"
+    environment:
+      DB_HOST: postgres-analytics
+      DB_PORT: 5432
+      DB_NAME: healthnet_analytics
+      DB_USER: healthnet
+      DB_PASSWORD: changeme_dev
+    depends_on:
+      - postgres-analytics
+    networks:
+      - healthnet-network
+
+  # ── Monitoring ─────────────────────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hn-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    networks:
+      - healthnet-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: hn-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: changeme_dev
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - healthnet-network
+
+networks:
+  healthnet-network:
+    driver: bridge
+
+volumes:
+  postgres-patients-data:
+  postgres-emr-data:
+  postgres-appt-data:
+  postgres-tele-data:
+  postgres-pharmacy-data:
+  postgres-analytics-data:
+  redis-data:
+  grafana-data:

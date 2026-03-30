@@ -1,0 +1,62 @@
+---
+# Common role: applied to all servers
+# Sets up baseline security, updates, and shared tools
+
+- name: Update and upgrade all packages
+  apt:
+    upgrade: dist
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install required packages
+  apt:
+    name:
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - curl
+      - wget
+      - git
+      - htop
+      - vim
+      - net-tools
+      - ntp
+    state: present
+
+- name: Configure unattended security upgrades
+  copy:
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    content: |
+      Unattended-Upgrade::Allowed-Origins {
+          "${distro_id}:${distro_codename}-security";
+      };
+      Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+      Unattended-Upgrade::MinimalSteps "true";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+      Unattended-Upgrade::Automatic-Reboot "false";
+
+- name: Enable unattended upgrades
+  service:
+    name: unattended-upgrades
+    state: started
+    enabled: true
+
+- name: Set system timezone to UTC
+  timezone:
+    name: UTC
+
+- name: Ensure NTP is running
+  service:
+    name: ntp
+    state: started
+    enabled: true
+
+- name: Set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Configure /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1 {{ inventory_hostname }}"
+    state: present

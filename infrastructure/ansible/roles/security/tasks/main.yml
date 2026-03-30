@@ -1,0 +1,155 @@
+---
+# Security role: SSH hardening, UFW firewall, fail2ban
+
+# ── SSH Hardening ────────────────────────────────────────────────────────────
+- name: Disable root SSH login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+    state: present
+  notify: restart sshd
+
+- name: Disable password authentication (key-only)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+  notify: restart sshd
+
+- name: Disable empty passwords
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitEmptyPasswords'
+    line: 'PermitEmptyPasswords no'
+    state: present
+  notify: restart sshd
+
+- name: Set SSH protocol to 2 only
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Protocol'
+    line: 'Protocol 2'
+    state: present
+  notify: restart sshd
+
+- name: Set SSH idle timeout (10 minutes)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^ClientAliveInterval'
+    line: 'ClientAliveInterval 600'
+  notify: restart sshd
+
+- name: Limit SSH max auth tries
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^MaxAuthTries'
+    line: 'MaxAuthTries 3'
+  notify: restart sshd
+
+# ── UFW Firewall ─────────────────────────────────────────────────────────────
+- name: Reset UFW to defaults
+  ufw:
+    state: reset
+
+- name: Set UFW default deny incoming
+  ufw:
+    default: deny
+    direction: incoming
+
+- name: Set UFW default allow outgoing
+  ufw:
+    default: allow
+    direction: outgoing
+
+- name: Allow SSH on non-standard port (change from 22 for hardening)
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Allow HTTP
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Allow HTTPS
+  ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
+- name: Allow Prometheus scraping from monitoring server only
+  ufw:
+    rule: allow
+    src: "{{ monitoring_server_ip | default('10.0.0.20') }}"
+    port: '9090'
+    proto: tcp
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    logging: 'on'
+
+# ── Fail2Ban ─────────────────────────────────────────────────────────────────
+- name: Configure fail2ban for SSH
+  copy:
+    dest: /etc/fail2ban/jail.local
+    content: |
+      [DEFAULT]
+      bantime  = 3600
+      findtime = 600
+      maxretry = 5
+      backend  = systemd
+
+      [sshd]
+      enabled  = true
+      port     = ssh
+      logpath  = %(sshd_log)s
+      maxretry = 3
+      bantime  = 86400
+
+      [nginx-http-auth]
+      enabled  = false
+
+  notify: restart fail2ban
+
+- name: Enable and start fail2ban
+  service:
+    name: fail2ban
+    state: started
+    enabled: true
+
+# ── Kernel Security Parameters ───────────────────────────────────────────────
+- name: Apply sysctl security settings
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  loop:
+    - { key: 'net.ipv4.tcp_syncookies',          value: '1' }
+    - { key: 'net.ipv4.conf.all.rp_filter',      value: '1' }
+    - { key: 'net.ipv4.conf.all.accept_redirects', value: '0' }
+    - { key: 'net.ipv4.conf.all.send_redirects',  value: '0' }
+    - { key: 'net.ipv4.icmp_echo_ignore_broadcasts', value: '1' }
+    - { key: 'kernel.randomize_va_space',         value: '2' }
+
+# ── Deploy user account ───────────────────────────────────────────────────────
+- name: Create healthnet deploy user
+  user:
+    name: healthnet
+    shell: /bin/bash
+    groups: sudo
+    append: true
+    create_home: true
+
+- name: Add deploy user SSH key
+  authorized_key:
+    user: healthnet
+    key: "{{ deploy_ssh_public_key }}"
+    state: present
+  when: deploy_ssh_public_key is defined

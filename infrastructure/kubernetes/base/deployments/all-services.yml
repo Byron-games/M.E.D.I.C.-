@@ -1,0 +1,436 @@
+---
+# API Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: healthnet
+  labels:
+    app: api-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8080"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: api-gateway
+          image: healthnet/api-gateway:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: redis-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: jwt-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 30
+---
+# EMR Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emr-service
+  namespace: healthnet
+  labels:
+    app: emr-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: emr-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: emr-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8082"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: emr-service
+          image: healthnet/emr-service:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_HOST
+            - name: DB_NAME
+              value: healthnet_emr
+            - name: DB_USER
+              value: healthnet
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: db-password
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "750m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+# Appointment Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  namespace: healthnet
+  labels:
+    app: appointment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: appointment-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8083"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: appointment-service
+          image: healthnet/appointment-service:latest
+          ports:
+            - containerPort: 8083
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_HOST
+            - name: DB_NAME
+              value: healthnet_appointments
+            - name: DB_USER
+              value: healthnet
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: db-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+# Telemedicine Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemedicine-service
+  namespace: healthnet
+  labels:
+    app: telemedicine-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: telemedicine-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: telemedicine-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8084"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: telemedicine-service
+          image: healthnet/telemedicine-service:latest
+          ports:
+            - containerPort: 8084
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_HOST
+            - name: DB_NAME
+              value: healthnet_telemedicine
+            - name: DB_USER
+              value: healthnet
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: db-password
+            - name: TELEMEDICINE_PROVIDER
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: TELEMEDICINE_PROVIDER
+            - name: DAILY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: daily-api-key
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8084
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8084
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+# Pharmacy Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pharmacy-service
+  namespace: healthnet
+  labels:
+    app: pharmacy-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pharmacy-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: pharmacy-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8085"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: pharmacy-service
+          image: healthnet/pharmacy-service:latest
+          ports:
+            - containerPort: 8085
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_HOST
+            - name: DB_NAME
+              value: healthnet_pharmacy
+            - name: DB_USER
+              value: healthnet
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: db-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8085
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8085
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+# Analytics Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: healthnet
+  labels:
+    app: analytics-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8086"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: analytics-service
+          image: healthnet/analytics-service:latest
+          ports:
+            - containerPort: 8086
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_HOST
+            - name: DB_NAME
+              value: healthnet_analytics
+            - name: DB_USER
+              value: healthnet
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: db-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8086
+            initialDelaySeconds: 60
+            periodSeconds: 30

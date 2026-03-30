@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-identity-service
+  namespace: healthnet
+  labels:
+    app: patient-identity-service
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: patient-identity-service
+  # Zero-downtime rolling update — critical for medical systems
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: patient-identity-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8081"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: patient-identity-service
+          image: healthnet/patient-identity-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+              name: http
+          env:
+            - name: SERVER_PORT
+              value: "8081"
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: healthnet-config
+                  key: DB_PORT
+            - name: DB_NAME
+              value: healthnet_patients
+            - name: DB_USER
+              value: healthnet
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthnet-secrets
+                  key: db-password
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Readiness probe: only send traffic when Spring is fully started
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          # Liveness probe: restart if the JVM is stuck
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      # Spread pods across nodes for HA
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - patient-identity-service
+                topologyKey: kubernetes.io/hostname

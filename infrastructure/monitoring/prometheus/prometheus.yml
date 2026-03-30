@@ -1,0 +1,58 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'healthnet-prod'
+
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+scrape_configs:
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'api-gateway'
+
+  - job_name: 'patient-identity-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['patient-identity-service:8081']
+
+  - job_name: 'emr-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['emr-service:8082']
+
+  - job_name: 'appointment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['appointment-service:8083']
+
+  - job_name: 'telemedicine-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['telemedicine-service:8084']
+
+  - job_name: 'pharmacy-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['pharmacy-service:8085']
+
+  - job_name: 'analytics-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['analytics-service:8086']

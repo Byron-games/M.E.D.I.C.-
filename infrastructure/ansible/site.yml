@@ -1,0 +1,23 @@
+---
+# HealthNet Ansible Site Playbook
+# Provisions and hardens all VPS servers
+# Usage: ansible-playbook -i inventory/hosts.ini site.yml
+
+- name: Apply common security hardening to all hosts
+  hosts: all
+  become: true
+  roles:
+    - common
+    - security
+
+- name: Install Docker on application servers
+  hosts: app_servers
+  become: true
+  roles:
+    - docker
+
+- name: Configure monitoring stack
+  hosts: monitoring_servers
+  become: true
+  roles:
+    - monitoring
