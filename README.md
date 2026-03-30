@@ -1,4 +1,4 @@
-# HealthNet — Unified Healthcare Interoperability & Telemedicine Hub
+# medic — Unified Healthcare Interoperability & Telemedicine Hub
 
 > A microservices platform connecting disparate health facilities through a standardized service layer, enabling shared patient records and a national telemedicine network.
 
@@ -76,8 +76,8 @@ Internet
 ### 1. Clone and start infrastructure
 
 ```bash
-git clone https://github.com/your-org/healthnet.git
-cd healthnet
+git clone https://github.com/your-org/medic.git
+cd medic
 docker-compose up -d
 ```
 
@@ -110,7 +110,7 @@ mvn verify
 ## Project Structure
 
 ```
-healthnet/
+medic/
 ├── api-gateway/                    # Spring Cloud Gateway
 ├── patient-identity-service/       # MPI — most critical service
 ├── emr-service/                    # Electronic Medical Records
@@ -142,22 +142,22 @@ healthnet/
 ### Step 1 — Initialize Git
 
 ```bash
-cd healthnet
+cd medic
 git init
 git add .
-git commit -m "feat: initial HealthNet scaffold"
+git commit -m "feat: initial medic scaffold"
 ```
 
 ### Step 2 — Create GitHub repository
 
 1. Go to https://github.com/new
-2. Create repo named `healthnet` (private)
+2. Create repo named `medic` (private)
 3. Do **not** initialize with README (we already have one)
 
 ### Step 3 — Push to GitHub
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/healthnet.git
+git remote add origin https://github.com/YOUR_USERNAME/medic.git
 git branch -M main
 git push -u origin main
 ```
@@ -190,13 +190,13 @@ kubectl apply -f infrastructure/kubernetes/base/secrets/secrets.yml
 kubectl apply -k infrastructure/kubernetes/overlays/prod
 
 # Watch rollout
-kubectl get pods -n healthnet -w
+kubectl get pods -n medic -w
 ```
 
 ### Verify all pods are running
 
 ```bash
-kubectl get all -n healthnet
+kubectl get all -n medic
 ```
 
 ---

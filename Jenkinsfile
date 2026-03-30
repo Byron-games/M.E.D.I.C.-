@@ -1,4 +1,4 @@
-// HealthNet Jenkins CI/CD Pipeline
+// medic Jenkins CI/CD Pipeline
 // Stages: Checkout → Build → Test → Security Scan → Docker Build → Push → Deploy
 
 pipeline {
@@ -11,7 +11,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY     = credentials('docker-registry-credentials')
-        DOCKER_IMAGE_PREFIX = 'healthnet'
+        DOCKER_IMAGE_PREFIX = 'medic'
         K8S_KUBECONFIG      = credentials('k8s-kubeconfig')
         SONAR_TOKEN         = credentials('sonarqube-token')
         DOCKER_BUILDKIT     = '1'
@@ -153,11 +153,11 @@ pipeline {
                     sh """
                         cd infrastructure/kubernetes/overlays/dev
                         kustomize edit set image \\
-                            healthnet/api-gateway=${DOCKER_IMAGE_PREFIX}/api-gateway:${BUILD_TAG} \\
-                            healthnet/patient-identity-service=${DOCKER_IMAGE_PREFIX}/patient-identity-service:${BUILD_TAG}
+                            medic/api-gateway=${DOCKER_IMAGE_PREFIX}/api-gateway:${BUILD_TAG} \\
+                            medic/patient-identity-service=${DOCKER_IMAGE_PREFIX}/patient-identity-service:${BUILD_TAG}
                         kubectl apply -k .
-                        kubectl rollout status deployment/api-gateway -n healthnet --timeout=120s
-                        kubectl rollout status deployment/patient-identity-service -n healthnet --timeout=120s
+                        kubectl rollout status deployment/api-gateway -n medic --timeout=120s
+                        kubectl rollout status deployment/patient-identity-service -n medic --timeout=120s
                     """
                 }
             }
@@ -177,20 +177,20 @@ pipeline {
                         cd infrastructure/kubernetes/overlays/prod
                         # Update all image tags
                         kustomize edit set image \\
-                            healthnet/api-gateway=${DOCKER_IMAGE_PREFIX}/api-gateway:${BUILD_TAG} \\
-                            healthnet/patient-identity-service=${DOCKER_IMAGE_PREFIX}/patient-identity-service:${BUILD_TAG} \\
-                            healthnet/emr-service=${DOCKER_IMAGE_PREFIX}/emr-service:${BUILD_TAG} \\
-                            healthnet/appointment-service=${DOCKER_IMAGE_PREFIX}/appointment-service:${BUILD_TAG} \\
-                            healthnet/telemedicine-service=${DOCKER_IMAGE_PREFIX}/telemedicine-service:${BUILD_TAG} \\
-                            healthnet/pharmacy-service=${DOCKER_IMAGE_PREFIX}/pharmacy-service:${BUILD_TAG} \\
-                            healthnet/analytics-service=${DOCKER_IMAGE_PREFIX}/analytics-service:${BUILD_TAG}
+                            medic/api-gateway=${DOCKER_IMAGE_PREFIX}/api-gateway:${BUILD_TAG} \\
+                            medic/patient-identity-service=${DOCKER_IMAGE_PREFIX}/patient-identity-service:${BUILD_TAG} \\
+                            medic/emr-service=${DOCKER_IMAGE_PREFIX}/emr-service:${BUILD_TAG} \\
+                            medic/appointment-service=${DOCKER_IMAGE_PREFIX}/appointment-service:${BUILD_TAG} \\
+                            medic/telemedicine-service=${DOCKER_IMAGE_PREFIX}/telemedicine-service:${BUILD_TAG} \\
+                            medic/pharmacy-service=${DOCKER_IMAGE_PREFIX}/pharmacy-service:${BUILD_TAG} \\
+                            medic/analytics-service=${DOCKER_IMAGE_PREFIX}/analytics-service:${BUILD_TAG}
 
                         kubectl apply -k .
 
                         # Wait for all rolling updates to complete
                         for svc in api-gateway patient-identity-service emr-service appointment-service telemedicine-service pharmacy-service analytics-service; do
                             echo "Waiting for \$svc rollout..."
-                            kubectl rollout status deployment/\$svc -n healthnet --timeout=180s
+                            kubectl rollout status deployment/\$svc -n medic --timeout=180s
                         done
 
                         echo "All services deployed successfully."

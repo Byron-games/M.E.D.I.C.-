@@ -3,7 +3,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: api-gateway-hpa
-  namespace: healthnet
+  namespace: medic
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -23,7 +23,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: patient-identity-hpa
-  namespace: healthnet
+  namespace: medic
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -43,7 +43,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: emr-service-hpa
-  namespace: healthnet
+  namespace: medic
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -69,7 +69,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: telemedicine-hpa
-  namespace: healthnet
+  namespace: medic
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

@@ -4,8 +4,8 @@ spring:
   application:
     name: analytics-service
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:healthnet_analytics}
-    username: ${DB_USER:healthnet}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:medic_analytics}
+    username: ${DB_USER:medic}
     password: ${DB_PASSWORD:changeme}
   jpa:
     hibernate:

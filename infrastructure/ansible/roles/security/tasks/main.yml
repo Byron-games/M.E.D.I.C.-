@@ -139,9 +139,9 @@
     - { key: 'kernel.randomize_va_space',         value: '2' }
 
 # ── Deploy user account ───────────────────────────────────────────────────────
-- name: Create healthnet deploy user
+- name: Create medic deploy user
   user:
-    name: healthnet
+    name: medic
     shell: /bin/bash
     groups: sudo
     append: true
@@ -149,7 +149,7 @@
 
 - name: Add deploy user SSH key
   authorized_key:
-    user: healthnet
+    user: medic
     key: "{{ deploy_ssh_public_key }}"
     state: present
   when: deploy_ssh_public_key is defined

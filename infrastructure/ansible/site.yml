@@ -1,5 +1,5 @@
 ---
-# HealthNet Ansible Site Playbook
+# medic Ansible Site Playbook
 # Provisions and hardens all VPS servers
 # Usage: ansible-playbook -i inventory/hosts.ini site.yml
 

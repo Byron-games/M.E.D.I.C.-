@@ -1,10 +1,10 @@
 {
-  "title": "HealthNet - Service Overview",
-  "uid": "healthnet-overview",
+  "title": "medic - Service Overview",
+  "uid": "medic-overview",
   "schemaVersion": 38,
   "version": 1,
   "refresh": "30s",
-  "tags": ["healthnet"],
+  "tags": ["medic"],
   "panels": [
     {
       "id": 1,
@@ -94,7 +94,7 @@
       "type": "stat",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
       "targets": [{
-        "expr": "healthnet_outbreak_alert_count",
+        "expr": "medic_outbreak_alert_count",
         "legendFormat": "Active Alerts"
       }],
       "options": { "colorMode": "background" },

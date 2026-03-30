@@ -4,11 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.healthnet</groupId>
-    <artifactId>healthnet-parent</artifactId>
+    <groupId>com.medic</groupId>    <artifactId>medic-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>HealthNet Parent</name>
+    <name>medic Parent</name>
     <description>Unified Healthcare Interoperability and Telemedicine Hub</description>
 
     <modules>
@@ -29,10 +28,10 @@
     </parent>
 
     <properties>
-        <java.version>17</java.version>
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <java.version>21</java.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
         <jjwt.version>0.12.5</jjwt.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
         <testcontainers.version>1.19.7</testcontainers.version>
         <jacoco.version>0.8.11</jacoco.version>
         <sonar.coverage.minimum>0.80</sonar.coverage.minimum>
@@ -72,7 +71,7 @@
             <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
-                <version>${mapstruct.version}</version>
+                <version>1.6.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -113,6 +112,11 @@
                             </exclude>
                         </excludes>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

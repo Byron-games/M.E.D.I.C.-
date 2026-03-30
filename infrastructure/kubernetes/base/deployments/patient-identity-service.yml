@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: patient-identity-service
-  namespace: healthnet
+  namespace: medic
   labels:
     app: patient-identity-service
     version: "1.0.0"
@@ -32,7 +32,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: patient-identity-service
-          image: healthnet/patient-identity-service:latest
+          image: medic/patient-identity-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
@@ -43,21 +43,21 @@ spec:
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: healthnet-config
+                  name: medic-config
                   key: DB_HOST
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: healthnet-config
+                  name: medic-config
                   key: DB_PORT
             - name: DB_NAME
-              value: healthnet_patients
+              value: medic_patients
             - name: DB_USER
-              value: healthnet
+              value: medic
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: healthnet-secrets
+                  name: medic-secrets
                   key: db-password
           resources:
             requests:

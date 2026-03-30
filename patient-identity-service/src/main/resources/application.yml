@@ -6,8 +6,8 @@ spring:
     name: patient-identity-service
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:healthnet_patients}
-    username: ${DB_USER:healthnet}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:medic_patients}
+    username: ${DB_USER:medic}
     password: ${DB_PASSWORD:changeme}
     hikari:
       maximum-pool-size: 10
@@ -43,5 +43,5 @@ management:
 
 logging:
   level:
-    com.healthnet: DEBUG
+    com.medic: DEBUG
     org.springframework.security: INFO

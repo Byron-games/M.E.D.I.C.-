@@ -8,14 +8,14 @@ COPY src ./src
 RUN mvn package -DskipTests -q
 
 FROM eclipse-temurin:17-jre-alpine AS runtime
-RUN addgroup -S healthnet && adduser -S healthnet -G healthnet
+RUN addgroup -S medic && adduser -S medic -G medic
 WORKDIR /app
 
 # Security: run as non-root user
-USER healthnet
+USER medic
 
 # Copy the built jar
-COPY --from=builder --chown=healthnet:healthnet /app/target/*.jar app.jar
+COPY --from=builder --chown=medic:medic /app/target/*.jar app.jar
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

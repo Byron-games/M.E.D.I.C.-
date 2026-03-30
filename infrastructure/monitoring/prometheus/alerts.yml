@@ -1,5 +1,5 @@
 groups:
-  - name: healthnet-service-alerts
+  - name: medic-service-alerts
     rules:
 
       # Service down for more than 1 minute
@@ -58,12 +58,12 @@ groups:
           summary: "DB connection pool under pressure on {{ $labels.job }}"
           description: "{{ $value }} threads are waiting for a DB connection on {{ $labels.job }}."
 
-  - name: healthnet-business-alerts
+  - name: medic-business-alerts
     rules:
 
       # Disease outbreak detected (from analytics service custom metric)
       - alert: OutbreakDetected
-        expr: healthnet_outbreak_alert_count > 0
+        expr: medic_outbreak_alert_count > 0
         for: 0m
         labels:
           severity: critical

@@ -6,19 +6,19 @@ bases:
 
 # Pin image tags in production (never use :latest in prod)
 images:
-  - name: healthnet/api-gateway
+  - name: medic/api-gateway
     newTag: "1.0.0"
-  - name: healthnet/patient-identity-service
+  - name: medic/patient-identity-service
     newTag: "1.0.0"
-  - name: healthnet/emr-service
+  - name: medic/emr-service
     newTag: "1.0.0"
-  - name: healthnet/appointment-service
+  - name: medic/appointment-service
     newTag: "1.0.0"
-  - name: healthnet/telemedicine-service
+  - name: medic/telemedicine-service
     newTag: "1.0.0"
-  - name: healthnet/pharmacy-service
+  - name: medic/pharmacy-service
     newTag: "1.0.0"
-  - name: healthnet/analytics-service
+  - name: medic/analytics-service
     newTag: "1.0.0"
 
 # Scale up replicas for production

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: healthnet
+  name: medic
   labels:
-    name: healthnet
+    name: medic
     environment: production

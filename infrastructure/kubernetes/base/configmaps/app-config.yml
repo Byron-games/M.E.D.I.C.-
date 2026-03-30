@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: healthnet-config
-  namespace: healthnet
+  name: medic-config
+  namespace: medic
 data:
   DB_HOST: "postgres-service"
   DB_PORT: "5432"

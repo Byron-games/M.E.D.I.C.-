@@ -48,9 +48,9 @@
     state: started
     enabled: true
 
-- name: Add healthnet user to docker group
+- name: Add medic user to docker group
   user:
-    name: healthnet
+    name: medic
     groups: docker
     append: true
 
@@ -67,13 +67,13 @@
         "live-restore": true,
         "no-new-privileges": true,
         "icc": false,
-        "userns-remap": "healthnet"
+        "userns-remap": "medic"
       }
   notify: restart docker
 
-- name: Create Docker network for HealthNet
+- name: Create Docker network for medic
   docker_network:
-    name: healthnet-network
+    name: medic-network
     driver: bridge
   ignore_errors: true
 

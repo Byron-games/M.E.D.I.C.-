@@ -4,8 +4,8 @@ spring:
   application:
     name: telemedicine-service
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:healthnet_telemedicine}
-    username: ${DB_USER:healthnet}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:medic_telemedicine}
+    username: ${DB_USER:medic}
     password: ${DB_PASSWORD:changeme}
   jpa:
     hibernate:
@@ -16,10 +16,10 @@ spring:
   flyway:
     enabled: true
 
-healthnet:
+medic:
   telemedicine:
     provider: ${TELEMEDICINE_PROVIDER:JITSI}
-    base-url: ${TELEMEDICINE_BASE_URL:https://meet.healthnet.com}
+    base-url: ${TELEMEDICINE_BASE_URL:https://meet.medic.com}
     daily:
       api-key: ${DAILY_API_KEY:}
     jitsi:
