@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html, body {
+    @apply bg-void text-body font-body;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-surface; }
+  ::-webkit-scrollbar-thumb { @apply bg-muted rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-subtle; }
+}
+
+@layer components {
+  .card {
+    @apply bg-panel border border-border rounded-xl p-6;
+  }
+
+  .btn-primary {
+    @apply bg-cyan text-void font-display font-semibold px-5 py-2.5 rounded-lg
+           hover:brightness-110 active:scale-95 transition-all duration-150
+           shadow-cyan-glow text-sm;
+  }
+
+  .btn-ghost {
+    @apply border border-border text-subtle font-body px-5 py-2.5 rounded-lg
+           hover:border-cyan hover:text-cyan transition-all duration-150 text-sm;
+  }
+
+  .btn-danger {
+    @apply bg-rose/10 border border-rose/30 text-rose font-body px-5 py-2.5 rounded-lg
+           hover:bg-rose/20 transition-all duration-150 text-sm;
+  }
+
+  .input {
+    @apply w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-body text-sm
+           placeholder:text-subtle focus:outline-none focus:border-cyan focus:ring-1 focus:ring-cyan/30
+           transition-all duration-150 font-body;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium;
+  }
+
+  .badge-green { @apply badge bg-emerald-dim text-emerald border border-emerald/20; }
+  .badge-cyan  { @apply badge bg-cyan-dim text-cyan border border-cyan/20; }
+  .badge-amber { @apply badge bg-amber-dim text-amber border border-amber/20; }
+  .badge-red   { @apply badge bg-rose-dim text-rose border border-rose/20; }
+  .badge-violet{ @apply badge bg-violet-dim text-violet border border-violet/20; }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-subtle text-sm font-body
+           hover:bg-surface hover:text-body transition-all duration-150 cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply nav-item bg-cyan-dim text-cyan border border-cyan/20;
+  }
+
+  .stat-card {
+    @apply card flex flex-col gap-1;
+  }
+
+  .grid-bg {
+    background-image: theme('backgroundImage.grid-pattern');
+    background-size: theme('backgroundSize.grid');
+  }
+}

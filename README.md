@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # medic — Unified Healthcare Interoperability & Telemedicine Hub
 
 > A microservices platform connecting disparate health facilities through a standardized service layer, enabling shared patient records and a national telemedicine network.
@@ -261,3 +262,7 @@ ansible-playbook -i inventory/hosts.ini site.yml --tags security
 - [ ] AI symptom triage endpoint in Analytics Service
 - [ ] USSD interface for feature phone access in rural areas
 - [ ] OpenAPI / Swagger docs for all services
+=======
+# M.E.D.I.C.-
+A central interoperability platform that connects different health facilities through a standardized service layer
+>>>>>>> 1a708aee1ff7f7d96a137c3203a00983e18bef9f

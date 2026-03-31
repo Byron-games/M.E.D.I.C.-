@@ -34,3 +34,6 @@ management:
     export:
       prometheus:
         enabled: true
+spring:
+  jpa:
+    open-in-view: false

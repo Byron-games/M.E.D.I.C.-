@@ -1,5 +1,5 @@
 # Multi-stage build for optimized image size
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 # Cache dependencies layer
 COPY pom.xml .
@@ -7,7 +7,7 @@ RUN mvn dependency:go-offline -q
 COPY src ./src
 RUN mvn package -DskipTests -q
 
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 RUN addgroup -S medic && adduser -S medic -G medic
 WORKDIR /app
 

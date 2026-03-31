@@ -4,7 +4,6 @@ server:
 spring:
   application:
     name: patient-identity-service
-
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:medic_patients}
     username: ${DB_USER:medic}
@@ -13,16 +12,15 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 2
       connection-timeout: 30000
-
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -32,7 +30,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus, metrics
+        include: health,info,prometheus,metrics
   endpoint:
     health:
       show-details: always
