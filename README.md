@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # medic — Unified Healthcare Interoperability & Telemedicine Hub
 
 > A microservices platform connecting disparate health facilities through a standardized service layer, enabling shared patient records and a national telemedicine network.
@@ -11,6 +10,12 @@
 Internet
     │
     ▼
+┌─────────────────────────────────────────────┐
+│              Frontend :5173                 │
+│  React • TypeScript • Tailwind CSS         │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
 ┌─────────────────────────────────────────────┐
 │           API Gateway  :8080                │
 │  JWT Auth • Rate Limiting • Request Routing │
@@ -50,7 +55,8 @@ Internet
 
 ## Tech Stack
 
-- **Backend:** Java 17 + Spring Boot 3.2
+- **Backend:** Java 21 + Spring Boot 3.2.5
+- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS
 - **Database:** PostgreSQL 15 (one DB per service)
 - **Cache / Rate Limit:** Redis 7
 - **API Gateway:** Spring Cloud Gateway
@@ -71,8 +77,9 @@ Internet
 
 ### Prerequisites
 - Docker Desktop
-- Java 17+
+- Java 21+
 - Maven 3.9+
+- Node.js 18+ (for frontend)
 
 ### 1. Clone and start infrastructure
 
@@ -82,29 +89,64 @@ cd medic
 docker-compose up -d
 ```
 
-### 2. Build all services
+### 2. Build backend services
 
 ```bash
 mvn clean package -DskipTests
 ```
 
-### 3. Run tests
+### 3. Build and run frontend
 
 ```bash
-# Unit tests
+cd medic-frontend
+npm install
+npm run dev
+```
+
+### 4. Run tests
+
+```bash
+# Backend unit tests
 mvn test
 
-# Integration tests (requires Docker for Testcontainers)
+# Backend integration tests (requires Docker for Testcontainers)
 mvn verify
+
+# Frontend tests (if added)
+npm test
 ```
 
 ### 4. Access services
 
 | URL | Service |
 |-----|---------|
+| http://localhost:5173 | Frontend (React) |
 | http://localhost:8080 | API Gateway (entry point) |
 | http://localhost:3000 | Grafana (admin/changeme_dev) |
 | http://localhost:9090 | Prometheus |
+
+---
+
+## Frontend Development
+
+The frontend is built with React 18, TypeScript, and Vite for fast development. It uses Tailwind CSS for styling, Zustand for state management, and React Query for data fetching.
+
+### Key Features
+- Responsive design for desktop and mobile
+- JWT-based authentication
+- Real-time appointment scheduling
+- Patient record management
+- Telemedicine session integration
+
+### Development Commands
+```bash
+cd medic-frontend
+npm install          # Install dependencies
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+```
 
 ---
 
@@ -119,6 +161,8 @@ medic/
 ├── telemedicine-service/           # Video sessions
 ├── pharmacy-service/               # e-Prescriptions
 ├── analytics-service/              # Public health analytics
+├── medic-frontend/                 # React frontend application
+├── docs/                           # Documentation
 ├── infrastructure/
 │   ├── ansible/                    # Server provisioning & hardening
 │   │   ├── site.yml
@@ -257,12 +301,11 @@ ansible-playbook -i inventory/hosts.ini site.yml --tags security
 ## What to Build Next (Backlog)
 
 - [ ] Auth Service: full login/register with JWT issuance
+- [ ] Frontend authentication integration
 - [ ] Notification Service: SMS alerts for appointments (Twilio/Africa's Talking)
 - [ ] Ingress with TLS (cert-manager + Let's Encrypt)
 - [ ] AI symptom triage endpoint in Analytics Service
 - [ ] USSD interface for feature phone access in rural areas
 - [ ] OpenAPI / Swagger docs for all services
-=======
-# M.E.D.I.C.-
-A central interoperability platform that connects different health facilities through a standardized service layer
->>>>>>> 1a708aee1ff7f7d96a137c3203a00983e18bef9f
+- [ ] Frontend testing with Jest and React Testing Library
+- [ ] Mobile-responsive design improvements
